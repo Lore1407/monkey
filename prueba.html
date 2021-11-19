@@ -1,0 +1,98 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+	<meta charset="UTF-8" />
+    <title>M</title>
+	<script type="text/javascript" src="js/phaser.min.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+
+var game = new Phaser.Game(800, 600, Phaser.AUTO, 'phaser-example', { preload: preload, create: create });
+
+function preload() {
+
+    game.load.spritesheet('button', 'assets/buttons/button_sprite_sheet.png', 193, 71);
+
+}
+
+var text;
+var button;
+var x = 32;
+var y = 80;
+
+function create() {
+
+    game.stage.backgroundColor = '#182d3b';
+
+  
+    game.load.onLoadStart.add(loadStart, this);
+    game.load.onFileComplete.add(fileComplete, this);
+    game.load.onLoadComplete.add(loadComplete, this);
+
+    button = game.add.button(game.world.centerX - 95, 400, 'button', start, this, 2, 1, 0);
+
+    //	Progress report
+    text = game.add.text(280, 320, 'ECO LADRILLOS', { fill: '#ffffff' });
+
+}
+
+function start() {
+
+    game.load.image('picture1', 'assets/pics/mighty_no_09_cover_art_by_robduenas.jpg');
+    game.load.image('picture2', 'assets/pics/cougar_dragonsun.png');
+    game.load.image('picture3', 'assets/pics/trsipic1_lazur.jpg');
+    game.load.image('picture4', 'assets/pics/archmage_in_your_face.png');
+    game.load.image('picture5', 'assets/pics/acryl_bladerunner.png');
+    game.load.image('picture6', 'assets/pics/acryl_bobablast.png');
+    game.load.image('picture7', 'assets/pics/alex-bisleys_horsy_5.png');
+
+    game.load.start();
+
+    button.visible = false;
+
+}
+
+function loadStart() {
+
+	text.setText("Loading ...");
+
+}
+
+
+function fileComplete(progress, cacheKey, success, totalLoaded, totalFiles) {
+
+	text.setText("File Complete: " + progress + "% - " + totalLoaded + " out of " + totalFiles);
+
+	var newImage = game.add.image(x, y, cacheKey);
+
+	newImage.scale.set(0.3);
+
+	x += newImage.width + 20;
+
+	if (x > 700)
+	{
+		x = 32;
+		y += 332;
+	}
+
+}
+
+function loadComplete() {
+
+	text.setText("Load Complete");
+
+}
+
+
+
+</script>
+
+</body>
+</html>

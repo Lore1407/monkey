@@ -1,0 +1,291 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+	<meta charset="UTF-8" />
+    <title>ECO BRICK</title>
+	<script type="text/javascript" src="js/phaser.min.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+
+var game = new Phaser.Game(800, 600, Phaser.AUTO, 'game', { preload: preload, create: create, update: update });
+
+var cascada;
+var plataformas;
+var piso2;
+
+
+
+var player;
+
+//Var objetos correctos
+var verdes;
+var blister;
+
+
+
+var rojos;
+
+
+var cursors;
+
+var score = 0;
+var scoreText;
+var vida =3;
+var vidatext;
+
+var text;
+var timedEvent;
+
+
+
+function preload() {
+	game.load.image('fondo', 'assets/FondoNemonte1.png');
+	game.load.image('cascada', 'assets/cascada7.png');
+    game.load.image('pagua', 'assets/PISOAGUA1.png');
+    game.load.image('ground', 'assets/roquitas.png');
+	//img objetos correctos
+    game.load.image('verde', 'assets/cubiertos.png');
+	game.load.image('blister', 'assets/desechos/blister.png');
+	game.load.image('rojo', 'assets/pilas.png');
+
+	
+    game.load.spritesheet('jugador', 'assets/nemonte.png', 32, 48);
+
+}
+
+
+
+
+
+function create() {
+
+
+    game.physics.startSystem(Phaser.Physics.ARCADE);
+	game.add.sprite(0, 0, 'fondo');
+	
+	
+	cascada = game.add.tileSprite(200,0, game.stage.bounds.width, game.cache.getImage('cascada').height, 'cascada');
+	cascada.scale.setTo(0.4, 1);
+	
+    plataformas = game.add.group();
+    plataformas.enableBody = true;
+
+	
+    var piso = plataformas.create(0, game.world.height - 800, 'ground');
+    piso.scale.setTo(0.125, 0.125);
+    piso.body.immovable = true;
+	
+	
+
+    var pisos = plataformas.create(522, 300, 'ground');
+	 pisos.scale.setTo(0.125, 0.125);
+    pisos.body.immovable = true;
+	
+	pisos = plataformas.create(522, 480, 'ground');
+		 pisos.scale.setTo(0.125, 0.125);
+	pisos.body.immovable = true;
+	
+	pisos = plataformas.create(-150, 150, 'ground');
+		 pisos.scale.setTo(0.125, 0.125);
+	pisos.body.immovable = true;
+	
+	pisos = plataformas.create(522, 100, 'ground');
+	 pisos.scale.setTo(0.125, 0.125);
+	pisos.body.immovable = true;
+	
+	pisos = plataformas.create(0, 400, 'ground');
+	 pisos.scale.setTo(0.125, 0.125);
+	pisos.body.immovable = true; 
+	
+	
+	
+	player = game.add.sprite(0, game.world.height - 400, 'jugador');
+    game.physics.arcade.enable(player);
+    player.body.bounce.y = 0.2;
+    player.body.gravity.y = 300;
+    player.body.collideWorldBounds = true;
+	player.scale.setTo(1.8, 1.8);
+    player.animations.add('left', [0, 1, 2, 3], 5, true);
+    player.animations.add('right', [4, 5, 6, 7],5, true);
+
+
+	piso2 = game.add.sprite(0, game.world.height - 64, 'pagua');
+	game.physics.arcade.enable(piso2);
+	piso2.body.collideWorldBounds = true;
+    piso2.scale.setTo(2, 2);
+    
+	
+	//Desechos correctos
+    verdes = game.add.group();
+    verdes.enableBody = true;
+    for (var i = 0; i <3; i++)
+    {
+        var verde = verdes.create(50+ i * 50, 0, 'verde');
+		verde.body.collideWorldBounds= true;
+        verde.body.gravity.y = 90;
+        verde.body.bounce.y = 0.1 + Math.random() * 0.2;
+		//verde.body.gravity.x = game.rnd.integerInRange(50,50);
+    }
+	
+	blisters = game.add.group();
+    blisters.enableBody = true;
+    for (var i = 0; i <3; i++)
+    {
+        var blister = blisters.create(50+ i * 50, 0, 'blister');
+		blister.body.collideWorldBounds= true;
+        blister.body.gravity.y = 90;
+        blister.body.bounce.y = 0.1 + Math.random() * 0.2;
+		//verde.body.gravity.x = game.rnd.integerInRange(50,50);
+    }
+	
+	
+	//Desechos incorrectos
+	rojos = game.add.group();
+    rojos.enableBody = true;
+    for (var i = 0; i < 4; i++)
+    {
+        var rojo = rojos.create(i * 200, 0, 'rojo');
+		rojo.body.collideWorldBounds= true;
+        rojo.body.gravity.y = 90;
+        //rojo.body.bounce.y = 100 + Math.random() * 100;
+		rojo.body.bounce.y = 0.1 + Math.random() * 0.2;
+		//rojo.body.gravity.x = game.rnd.integerInRange(50,50);
+    }
+	
+
+	
+	text = game.add.text(400, 60, '0', { font: '64px Courier', fill: '#fff' });
+    scoreText = game.add.text(400, 60, '0', { font: '64px Courier', fill: '#fff' });
+	vidatext = game.add.text(100, 60, '3', { font: '64px Courier', fill: '#fff' });
+    cursors = game.input.keyboard.createCursorKeys();
+    
+	
+//	console.log('create');
+    // 2:30 in seconds
+    game.initialTime = 180;
+
+    text = game.add.text(32, 32, '' + formatTime(game.initialTime));
+
+    // Each 1000 ms call onEvent
+    timedEvent = game.time.addEvent({ delay: 1000, callback: onEvent, callbackScope: game, loop: true });
+
+function formatTime(seconds){
+    // Minutes
+    var minutes = Math.floor(seconds/60);
+    // Seconds
+    var partInSeconds = seconds%60;
+    // Adds left zeros to seconds
+    partInSeconds = partInSeconds.toString().padStart(2,'0');
+    // Returns formated time
+    return `${minutes}:${partInSeconds}`;
+}
+
+
+function onEvent ()
+{
+    game.initialTime -= 1; // One second
+    text.setText('' + formatTime(game.initialTime));
+}
+}
+
+function update() {
+
+	cascada.tilePosition.y -= -9;
+ 
+    
+	game.physics.arcade.collide(player, plataformas);
+    game.physics.arcade.collide(verdes, plataformas);
+	game.physics.arcade.collide(blisters, plataformas);
+	
+	game.physics.arcade.collide(rojos, plataformas);
+
+	
+	
+    game.physics.arcade.overlap(player, verdes, collectVerde, null, this);
+	game.physics.arcade.overlap(player, blisters, collectblister, null, this);
+	
+	
+	
+	game.physics.arcade.overlap(player, rojos, collectRojo, null, this);
+	
+	
+	
+	
+	
+	game.physics.arcade.overlap(piso2, rojos, fondoagua, null, this);
+    player.body.velocity.x = 0;
+
+    if (cursors.left.isDown)
+    {
+     
+        player.body.velocity.x = -150;
+        player.animations.play('left');
+    }
+    else if (cursors.right.isDown)
+    {
+        player.body.velocity.x = 150;
+        player.animations.play('right');
+    }
+    else
+    {
+        player.animations.stop();
+        player.frame = 4;
+    }
+    if (cursors.up.isDown && player.body.touching.down)
+    {
+        player.body.velocity.y = -350;
+    }
+	
+	
+	
+
+
+}
+
+function collectVerde (player, verde) {
+    verde.kill();
+    score += 10;
+    scoreText.text = '' + score;
+
+}
+
+
+function collectblister (player, blister) {
+    blister.kill();
+    score += 10;
+    scoreText.text = '' + score;
+
+}
+
+
+
+
+
+
+function collectRojo(player, rojo) {
+    rojo.kill();
+    score += -5;
+	vida +=-1;
+    scoreText.text = '' + score;
+	vidatext.text = '' + vida;
+}
+
+
+
+function fondoagua(piso2, rojo ) {
+    rojo.kill();
+ 
+}
+
+
+</script>
+
+</body>
+</html>

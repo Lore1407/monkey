@@ -1,0 +1,425 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+	<meta charset="UTF-8" />
+    <title>EGG </title>
+	<script type="text/javascript" src="js/phaser.min.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+
+
+var game = new Phaser.Game(800, 600, Phaser.AUTO, 'game', null, false, false);
+
+game._fontStyle = null;
+
+
+var plataformas;
+var piso2;
+
+var player;
+
+//Var objetos correctos
+
+var huevosb;
+var huevosblancos;
+var gotas;
+
+var huevosoro;
+
+
+var score = 0;
+var scoreText;
+var scoreicono;
+
+var vida =5;
+var vidatext;
+var vidaicono;
+var obpajaritos;
+
+
+var cursors;
+
+var botoncito;
+var instrucciones;
+
+var w = 800, h = 600;
+
+//var botoninstrucciones;
+
+
+
+var BasicGame = function (game) {};
+BasicGame.Boot = function (game) {};
+var timer, timerEvent, timertext, zerotime;
+
+BasicGame.Boot.prototype = {
+    preload: function () {
+	game.load.image('fondo', 'assets/Fondociudad8.png',1600,600);
+	
+    game.load.image('pagua', 'assets/PISOAGUA.png');
+    game.load.image('ground', 'assets/pisoci.png');
+	game.load.image('pajaritos', 'assets/Pajaritos.png');
+	//img objetos correctos
+	game.load.image('huevob', 'assets/desechos/blister.png');
+	
+	game.load.image('huevoblanco', 'assets/desechos/HuevoB.png');
+
+	game.load.image('huevooro', 'assets/desechos/HuevoB.png');
+	
+	//img objetos incorrectos
+	game.load.image('gota', 'assets/desechos/HuevoB.png');
+
+	//srite jugador
+   // game.load.spritesheet('jugador', 'assets/nemo2.png', 72, 92);
+	game.load.spritesheet('jugador', 'assets/raton3.png', 89, 107);
+	
+	//img interfaz
+	
+	game.load.spritesheet('boton', 'assets/botones.png', 180, 80);
+	game.load.spritesheet('botonayuda', 'assets/ayuda1.png', 30, 30);
+	game.load.image('instimagen', 'assets/FondoNemonte1.png');
+	
+	game.load.image('gameover', 'assets/gameover.png');
+	game.load.image('swimtime', 'assets/swimtime.png');
+	game.load.image('zerotime', 'assets/time.png');
+	//game.load.image('vidanemonte', 'assets/nemovid.png');
+	//game.load.image('score', 'assets/score1.png');
+	
+	game.load.image('menu', 'assets/FondoNemonte1.png', 270, 180);
+        
+    },
+	
+	
+create: function () 
+{
+	game._fontStyle = { font : "40px Arial", fill : "#FFCC00", stroke : "#333", strokeThickness : 5, align : "center"};
+	game.physics.startSystem(Phaser.Physics.ARCADE);
+	
+	game.add.sprite(0, 0, 'fondo');
+
+	
+	
+						scoreText= this.game.add.text(650,45,"0",game._fontStyle);
+					//	scoreicono=this.game.add.image(10,130,'score');
+					//	scoreicono.scale.setTo(0.02, 0.02);
+						
+						vidatext= this.game.add.text(140,45,"5",game._fontStyle);
+					//	vidaicono=this.game.add.image(1,40,'vidanemonte');
+					
+					//	vidaicono.scale.setTo(0.02, 0.02);
+						
+						
+						obpajaritos=this.game.add.image(0,100,'pajaritos');
+						
+					timer = game.time.create();
+					timerEvent = timer.add(Phaser.Timer.MINUTE * 1 + Phaser.Timer.SECOND * 0, this.endTimer, this);
+					timer.start();
+						
+	
+    plataformas = game.add.group();
+    plataformas.enableBody = true;
+
+  
+	
+    var pisos = plataformas.create(0, 545, 'ground');
+//	pisos.scale.setTo(0.125, 0.125);
+    pisos.body.immovable = true;
+	
+
+	
+	//Desechos correctos
+						huevosb=game.add.group();
+						huevosb.enableBody = true;
+						function createhuevob() 	{
+						var huevob = huevosb.create(game.world.randomX, 244, 'huevob');
+
+						//var huevob = huevosb.create(game.world.randomY, 300, 'huevob');
+						huevob.body.collideWorldBounds = true;
+						huevob.body.gravity.y = 70;
+						huevob.body.bounce.y = 0.1 + Math.random() * 0.2;
+													}
+						game.time.events.repeat(Phaser.Timer.SECOND * 2, 100, createhuevob, this);
+						
+						huevosblancos=game.add.group();
+						huevosblancos.enableBody = true;
+						function createHuevoBlanco() {
+						var huevoblanco = huevosblancos.create(game.world.randomX, 244, 'huevoblanco');
+						huevoblanco.body.collideWorldBounds = true;
+						huevoblanco.body.gravity.y = 70;
+						huevoblanco.body.bounce.y = 0.1 + Math.random() * 0.2;
+													}
+						game.time.events.repeat(Phaser.Timer.SECOND * 2, 100, createHuevoBlanco, this);
+							
+					
+						huevosoro=game.add.group();
+						huevosoro.enableBody = true;
+						function createhuevooro() 	{
+						var huevooro = huevosoro.create(game.world.randomX, 244, 'huevooro');
+						huevooro.body.collideWorldBounds = true;
+						huevooro.body.gravity.y = 70;
+						huevooro.body.bounce.y = 0.1 + Math.random() * 0.2;
+						//huevooro.scale.setTo(0.08, 0.08);
+						}
+						game.time.events.repeat(Phaser.Timer.SECOND * 2, 100, createhuevooro, this);
+		
+	//Desechos incorrectos
+		
+						gotas = game.add.group();
+						gotas.enableBody = true;
+						function creategotas() {
+						var gota = gotas.create(game.world.randomX, 300, 'gota');
+						gota.body.collideWorldBounds = true;
+						gota.body.gravity.y = 70;
+						gota.body.bounce.y = 0.1 + Math.random() * 0.2;
+												}
+						game.time.events.repeat(Phaser.Timer.SECOND * 2, 100, creategotas, this);
+
+						
+						
+						
+					//Jugador
+					
+						player = game.add.sprite(0, game.world.height - 400, 'jugador');
+						game.physics.arcade.enable(player);
+						player.body.bounce.y = 0.2;
+						player.body.gravity.y = 300;
+						player.body.collideWorldBounds = true;
+						player.animations.add('left', [0, 1, 2, 3], 5, true);
+						player.animations.add('right', [4, 5, 6, 7], 5, true);	 
+						cursors = game.input.keyboard.createCursorKeys();	 
+						
+					//Botones
+					
+						instrucciones = game.add.tileSprite(80, 60, 800, 600, 'instimagen');
+						instrucciones.scale.setTo(0.8, 0.8);
+						
+						botoncito = game.add.button(game.world.centerX - 95, 400, 'boton', controlinst, this, 2, 1, 0);
+						
+
+						
+						pause_label = game.add.text(w - 100, 20, 'PAUSE', game._fontStyle);
+						pause_label.inputEnabled = true;
+						
+						
+						
+						
+						pause_label.events.onInputUp.add(function () {
+						game.paused = true;
+						menu = game.add.sprite(w/2, h/2, 'menu');
+						menu.anchor.setTo(0.5, 0.5);
+			
+						choiseLabel = game.add.text(w/2, h-150, 'Continuar', game._fontStyle);
+						choiseLabel.anchor.setTo(0.5, 0.5);
+																	 });
+																	 
+																	 
+						game.input.onDown.add(unpause, self);
+
+	//PAUSA
+    function unpause(event)  {
+      
+        if(game.paused){
+        var x1 = w/2 - 270/2, x2 = w/2 + 270/2,
+            y1 = h/2 - 180/2, y2 = h/2 + 180/2;
+
+            if(event.x > x1 && event.x < x2 && event.y > y1 && event.y < y2 ){
+				var choisemap = ['one', 'two', 'three', 'four', 'five', 'six'];
+                var x = event.x - x1,
+                    y = event.y - y1;
+
+                var choise = Math.floor(x / 90) + 3*Math.floor(y / 90);
+                choiseLabel.text = 'You chose menu item: ' + choisemap[choise];
+																			}
+					else{
+						menu.destroy();
+						choiseLabel.destroy();
+						game.paused = false;
+						}
+						}
+							};
+	
+	
+}, //Fin create
+
+
+update: function () 
+{
+				game.physics.arcade.collide(player, plataformas);
+				game.physics.arcade.overlap(player, huevosblancos, collecthuevob, null, this);
+				game.physics.arcade.overlap(player, huevosb, collecthuevob, null, this);
+				game.physics.arcade.overlap(player, huevosoro, collecthuevooro, null, this);
+				game.physics.arcade.overlap(player, gotas, collectgota, null, this);
+				
+				game.physics.arcade.overlap(huevosblancos, plataformas, desaparecerhuevob, null, this);
+				game.physics.arcade.overlap(huevosb, plataformas, desaparecerhuevob, null, this);
+				game.physics.arcade.overlap(gotas, plataformas, desaparecergotas, null, this);
+				game.physics.arcade.overlap(huevosoro, plataformas, desaparecerhuevosoro, null, this);
+				
+				
+				//Movimiento jugador
+				
+				player.body.velocity.x = 0;
+
+						if (cursors.left.isDown)
+						{
+						 
+							player.body.velocity.x = -150;
+							player.animations.play('left');
+						}
+							else if (cursors.right.isDown)
+							{
+								player.body.velocity.x = 150;
+								player.animations.play('right');
+							}
+						else
+						{
+							player.animations.stop();
+							player.frame = 4;
+						}
+							if (cursors.up.isDown && player.body.touching.down)
+							{
+								player.body.velocity.y = -350;
+							}
+	
+},//Fin update
+	
+	//Timer
+	render: function () {
+       
+        if (timer.running) {
+		
+            game.debug.text(this.formatTime(Math.round((timerEvent.delay - timer.ms) / 1000)), 385, 75, "#FFCC00", "37px Arial", "#333" );
+	
+	
+			
+        }
+        else {
+			player.kill();
+			timer.stop();
+			//game.debug.text("GAME OVER", 350,200, "64px", "#0f0");
+            var zerotime= game.add.sprite(200, 100, 'zerotime');
+			zerotime.scale.setTo(0.2, 0.2);
+			
+			//timer.setVisible(false);
+        }
+		
+		
+    },
+    endTimer: function() {
+        // Stop the timer when the delayed event triggers
+        timer.stop();
+			
+		
+    },
+    formatTime: function(s) {
+        // Convert seconds (s) to a nicely formatted and padded time string
+        var minutes = "" + Math.floor(s / 60);
+        var seconds = "" + (s - minutes * 60);
+        return minutes.substr(-2) + ":" + seconds.substr(-2);   
+	
+		
+    }
+							
+}; //BasicGame
+
+	//Funciones
+	
+//Recoger huevos y gotas
+						  
+		function collecthuevob(player, huevob)  {
+		huevob.kill();
+		score += 10;
+		scoreText.text = '' + score;
+												}
+										  
+		function collecthuevoblanco (player, huevoblanco) {
+		huevoblanco.kill();
+		score += 10;
+		scoreText.text = '' + score;
+														  }								  
+								
+		function collecthuevooro (player, huevooro) {
+		huevooro.kill();
+		score += 50;
+		scoreText.text = '' + score;
+												   }
+		
+		function collectgota(player, gota) {
+			gota.kill();
+			score += -10;
+			vida +=-1;
+			scoreText.text = '' + score;
+			vidatext.text = '' + vida;
+				
+							if (vida<=0) 	{
+							player.destroy();
+							timer.stop();
+							var gameover= game.add.sprite(200,100, 'gameover');	
+							gameover.scale.setTo(0.2, 0.2);
+											}
+											}
+										   
+//Desaparecer desechos con el agua		
+
+		function fondoagua(piso2, gota) 	{
+			gota.kill();
+											}
+											
+		function fondoagua2(piso2, huevob) 	{
+			huevob.kill();
+											}
+												
+		function fondoagua3(piso2, huevooro)	{
+			huevooro.kill();
+											}
+												
+		function fondoagua4(piso2, huevoblanco){
+			huevoblanco.kill();
+											   }
+											   
+//Desaparecer desechos con el piso
+
+		function desaparecerHuevo(huevob, plataformas){
+        huevob.kill();
+													  }		
+													  
+		function desaparecerhuevob(huevob, plataformas)	{
+        huevob.kill();
+														}
+												
+		function desaparecergotas(gota, plataformas)	{
+        gota.kill();
+														}										
+										
+		function desaparecerhuevosoro(huevooro, plataformas){
+        huevooro.kill();
+														   }
+			
+		function collectSwim(player, piso2) {
+		player.destroy();
+		var swimtime= game.add.sprite(200, 100, 'swimtime');
+		swimtime.scale.setTo(0.2, 0.2);
+											}
+		
+		function controlinst(botoncito, pointer, inst) 	{		
+		if (inst)
+		{
+		timer.start();
+        instrucciones.visible =! instrucciones.visible;
+		botoncito.visible =! botoncito.visible;
+		}
+														}
+game.state.add('Boot', BasicGame.Boot);
+game.state.start('Boot');
+
+</script>
+
+</body>
+</html>
